@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
+    private lateinit var sensorManager: SensorManager
     private val bitmask7: Long = 0b01111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000
     private val bitmask6: Long = 0b00000000_11111111_00000000_00000000_00000000_00000000_00000000_00000000
     private val bitmask5: Long = 0b00000000_00000000_11111111_00000000_00000000_00000000_00000000_00000000
@@ -28,8 +29,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.registerListener(this, it, 1000000)
         }
     }
-
-    private lateinit var sensorManager: SensorManager
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
