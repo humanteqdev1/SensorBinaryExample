@@ -1,16 +1,11 @@
 package com.example.back.sensortext
 
-import android.content.Context
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 
-class MainActivity : AppCompatActivity(), SensorEventListener {
-    private lateinit var sensorManager: SensorManager
+class MainActivity : AppCompatActivity() {
     private val bitmask7: Long = 0b01111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000
     private val bitmask6: Long = 0b00000000_11111111_00000000_00000000_00000000_00000000_00000000_00000000
     private val bitmask5: Long = 0b00000000_00000000_11111111_00000000_00000000_00000000_00000000_00000000
@@ -24,54 +19,53 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)?.let {
-            sensorManager.registerListener(this, it, 1000000)
-        }
+        val telemetry = SensorTelemetry(this)
+        telemetry.start("some-id", Sensor.TYPE_GYROSCOPE)
+        telemetry.stop()
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.let {
-            val builder = StringBuilder(256)
-            //For each value in array append its string representation
-            for (i in 0 until it.values.size) {
-                //Get bits
-                val value = it.values[i].toBits().toLong()
-                Log.e("-- TEST", "\n${it.values[i]} = $value\n")
-
-                //Shift to match ascii table
-                val b3 = (value and bitmask3) shr (8 * 3)
-                val b2 = (value and bitmask2) shr (8 * 2)
-                val b1 = (value and bitmask1) shr (8 * 1)
-                val b0 = (value and bitmask0)
-
-                //Append 4 chars
-                builder.append("${b3.toChar()}${b2.toChar()}${b1.toChar()}${b0.toChar()}")
-            }
-
-            //Shift each byte of timestamp to match ascii table
-            val b7 = (it.timestamp and bitmask7) shr (8 * 7)
-            val b6 = (it.timestamp and bitmask6) shr (8 * 6)
-            val b5 = (it.timestamp and bitmask5) shr (8 * 5)
-            val b4 = (it.timestamp and bitmask4) shr (8 * 4)
-            val b3 = (it.timestamp and bitmask3) shr (8 * 3)
-            val b2 = (it.timestamp and bitmask2) shr (8 * 2)
-            val b1 = (it.timestamp and bitmask1) shr (8 * 1)
-            val b0 = (it.timestamp and bitmask0)
-
-            //Append 8 chars
-            builder.append("${b7.toChar()}${b6.toChar()}${b5.toChar()}${b4.toChar()}" +
-                    "${b3.toChar()}${b2.toChar()}${b1.toChar()}${b0.toChar()}")
-
-            Log.e("---TEsT", "TIMESTAMP: ${it.timestamp}")
-            builder.trimToSize()
-            decodeBytes(builder.toString())
-            sensorManager.unregisterListener(this)
-        }
-    }
+//    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+//    }
+//
+//    override fun onSensorChanged(event: SensorEvent?) {
+//        event?.let {
+//            val builder = StringBuilder(256)
+//            //For each value in array append its string representation
+//            for (i in 0 until it.values.size) {
+//                //Get bits
+//                val value = it.values[i].toBits().toLong()
+//                Log.e("-- TEST", "\n${it.values[i]} = $value\n")
+//
+//                //Shift to match ascii table
+//                val b3 = (value and bitmask3) shr (8 * 3)
+//                val b2 = (value and bitmask2) shr (8 * 2)
+//                val b1 = (value and bitmask1) shr (8 * 1)
+//                val b0 = (value and bitmask0)
+//
+//                //Append 4 chars
+//                builder.append("${b3.toChar()}${b2.toChar()}${b1.toChar()}${b0.toChar()}")
+//            }
+//
+//            //Shift each byte of timestamp to match ascii table
+//            val b7 = (it.timestamp and bitmask7) shr (8 * 7)
+//            val b6 = (it.timestamp and bitmask6) shr (8 * 6)
+//            val b5 = (it.timestamp and bitmask5) shr (8 * 5)
+//            val b4 = (it.timestamp and bitmask4) shr (8 * 4)
+//            val b3 = (it.timestamp and bitmask3) shr (8 * 3)
+//            val b2 = (it.timestamp and bitmask2) shr (8 * 2)
+//            val b1 = (it.timestamp and bitmask1) shr (8 * 1)
+//            val b0 = (it.timestamp and bitmask0)
+//
+//            //Append 8 chars
+//            builder.append("${b7.toChar()}${b6.toChar()}${b5.toChar()}${b4.toChar()}" +
+//                    "${b3.toChar()}${b2.toChar()}${b1.toChar()}${b0.toChar()}")
+//
+//            Log.e("---TEsT", "TIMESTAMP: ${it.timestamp}")
+//            builder.trimToSize()
+//            decodeBytes(builder.toString())
+////            sensorManager.unregisterListener(this)
+//        }
+//    }
 
     private fun getBits(str: String, offset: Int): Int {
         val b3 = str[0 + offset].toInt() shl (8 * 3)
