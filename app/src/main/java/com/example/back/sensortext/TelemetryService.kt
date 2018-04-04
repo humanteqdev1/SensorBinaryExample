@@ -47,6 +47,7 @@ class SensorTelemetry(private val context: Context) : SensorEventListener {
             val intent = Intent(context, TelemetryService::class.java)
             intent.putExtra(SENSOR_TELEMETRY_SESSION_ID, id)
             intent.putExtra(SENSOR_TELEMETRY_TYPE, type)
+            context.startService(intent)
         }
     }
 
